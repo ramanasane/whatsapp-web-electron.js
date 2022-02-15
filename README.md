@@ -1,13 +1,16 @@
-[![npm](https://img.shields.io/npm/v/whatsapp-web.js.svg)](https://www.npmjs.com/package/whatsapp-web.js) [![Depfu](https://badges.depfu.com/badges/4a65a0de96ece65fdf39e294e0c8dcba/overview.svg)](https://depfu.com/github/pedroslopez/whatsapp-web.js?project_id=9765) ![WhatsApp_Web 2.2202.12](https://img.shields.io/badge/WhatsApp_Web-2.2202.12-brightgreen.svg) [![Discord Chat](https://img.shields.io/discord/698610475432411196.svg?logo=discord)](https://discord.gg/H7DqQs4)  
+[![npm](https://img.shields.io/npm/v/whatsapp-web-electron.js)](https://www.npmjs.com/package/whatsapp-web-electron.js) [![Depfu](https://badges.depfu.com/badges/4a65a0de96ece65fdf39e294e0c8dcba/overview.svg)](https://depfu.com/github/pedroslopez/whatsapp-web.js?project_id=9765) ![WhatsApp_Web 2.2202.12](https://img.shields.io/badge/WhatsApp_Web-2.2202.12-brightgreen.svg) [![Discord Chat](https://img.shields.io/discord/698610475432411196.svg?logo=discord)](https://discord.gg/H7DqQs4)  
 
-# whatsapp-web.js
+# whatsapp-web-electron.js
+
 A WhatsApp API client that connects through the WhatsApp Web browser app
 
 It uses Puppeteer to run a real instance of Whatsapp Web to avoid getting blocked.
 
+This is an electron wrapper for [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js) which connect using [puppeteer-in-electron](https://github.com/TrevorSundberg/puppeteer-in-electron).
+
 **NOTE:** I can't guarantee you will not be blocked by using this method, although it has worked for me. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.
 
-## Quick Links
+## whatsapp-web.js Quick Links
 
 * [Guide / Getting Started](https://wwebjs.dev/guide) _(work in progress)_
 * [Reference documentation](https://docs.wwebjs.dev/)
@@ -15,70 +18,53 @@ It uses Puppeteer to run a real instance of Whatsapp Web to avoid getting blocke
 * [npm](https://npmjs.org/package/whatsapp-web.js)
 
 ## Installation
+> :warning: **This is not pushed to NPM. You need to install directly from the github url**
 
-The module is now available on npm! `npm i whatsapp-web.js`
+The module is now available on [npm](https://npmjs.org/package/whatsapp-web-electron.js)! `npm i whatsapp-web-electron.js`
 
 Please note that Node v12+ is required.
 
 ## Example usage
 
 ```js
-const { Client } = require('whatsapp-web.js');
+const { app, BrowserWindow } = require('electron');
+const puppeteer = require('puppeteer-core');
+const pie = require('puppeteer-in-electron');
+const { Client } = require('whatsapp-web-electron.js');
 
-const client = new Client();
-
-client.on('qr', (qr) => {
-    // Generate and scan this code with your phone
-    console.log('QR RECEIVED', qr);
+const window = new BrowserWindow({
+    // your options...
 });
 
-client.on('ready', () => {
-    console.log('Client is ready!');
-});
+pie.connect(app, puppeteer).then((pieBrowser) => {
+    const client = new Client(pieBrowser, window);
 
-client.on('message', msg => {
-    if (msg.body == '!ping') {
-        msg.reply('pong');
-    }
-});
+    // No need to listen for "qr" event as you can scan
+    // the qr code directly in electron window
 
-client.initialize();
-```
+    client.on('ready', () => {
+        console.log('Client is ready!');
+    });
 
-Take a look at [example.js](https://github.com/pedroslopez/whatsapp-web.js/blob/master/example.js) for another example with more use cases.
+    client.on('message', msg => {
+        if (msg.body == '!ping') {
+            msg.reply('pong');
+        }
+    });
 
-## Remote Access
-
-You could also connect to any previously existing browser instance:
-
-```js
-const client = new Client({ 
-    puppeteer: {
-        browserWSEndpoint: `ws://localhost:3000`
-    }
+    client.initialize();
 });
 ```
 
-### Docker
+Take a look at [whatsapp-web.js example.js](https://github.com/pedroslopez/whatsapp-web.js/blob/master/example.js) for another example with more use cases. The only difference should be the initialization process and a few feature (explained below).
 
-1) Installing a browser using browserless:
+## Remote Access and Docker
 
-```
-docker run \
-  --rm \
-  -p 3000:3000 \
-  -e "MAX_CONCURRENT_SESSIONS=1" \
-  browserless/chrome:latest
-```
+The original [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js) has remote access feature and supports docker which is irrelevant for an electron project, that's why I didn't include it here.
 
-Reference: https://docs.browserless.io/docs/docker-quickstart.html
+## Sending Arbitrary Image as Sticker
 
-### Remote Debugging
-
-2) Running a browser with websocket remote debugging enabled:
-> chrome.exe --remote-debugging-port=9222
-
-After that check the following webpage and check http://127.0.0.1:9220/json and get the **webSocketDebuggerUrl**
+Sending image as sticker requires [sharp](https://github.com/lovell/sharp/releases) package and it's difficult to package with electron, so I choose to remove it. Feel free to open a PR if you can fix this issue.
 
 ## Supported features
 
@@ -88,7 +74,7 @@ After that check the following webpage and check http://127.0.0.1:9220/json and 
 | Receive messages  | ✅  |
 | Send media (images/audio/documents)  | ✅  |
 | Send media (video)  | ✅ [(requires google chrome)](https://wwebjs.dev/guide/handling-attachments.html#caveat-for-sending-videos-and-gifs)  |
-| Send stickers | ✅ |
+| Send stickers | ✅ [(can't send arbitrary image)](#sending-arbitrary-image-as-sticker) |
 | Receive media (images/audio/video/documents)  | ✅  |
 | Send contact cards | ✅ |
 | Send location | ✅ |
@@ -116,19 +102,11 @@ Something missing? Make an issue and let us know!
 
 Pull requests are welcome! If you see something you'd like to add, please do. For drastic changes, please open an issue first.
 
-## Donating
-
-You can support the maintainer of this project through the link below
-
-[![Support via PayPal](https://cdn.rawgit.com/twolfson/paypal-github-button/1.0.0/dist/button.svg)](https://www.paypal.me/psla/)
-
 ## Disclaimer
 
 This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with WhatsApp or any of its subsidiaries or its affiliates. The official WhatsApp website can be found at https://whatsapp.com. "WhatsApp" as well as related names, marks, emblems and images are registered trademarks of their respective owners.
 
 ## License
-
-Copyright 2019 Pedro S Lopez
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this project except in compliance with the License.

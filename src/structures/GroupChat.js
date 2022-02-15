@@ -59,9 +59,16 @@ class GroupChat extends Chat {
      * @returns {Promise<Object>}
      */
     async addParticipants(participantIds) {
-        return await this.client.pupPage.evaluate((chatId, participantIds) => {
-            return window.Store.Wap.addParticipants(chatId, participantIds);
-        }, this.id._serialized, participantIds);
+        // return await this.client.pupPage.evaluate((chatId, participantIds) => {
+        //     return window.Store.Wap.addParticipants(chatId, participantIds);
+        // }, this.id._serialized, participantIds);
+        let data = [];
+        for (let participantId of participantIds) {
+            data.push(await this.client.pupPage.evaluate((chatId, participantIds) => {
+                return window.Store.Wap.addParticipants(chatId, participantIds);
+            }, this.id._serialized, [participantId]));
+        }
+        return data;
     }
 
     /**
@@ -70,9 +77,16 @@ class GroupChat extends Chat {
      * @returns {Promise<Object>}
      */
     async removeParticipants(participantIds) {
-        return await this.client.pupPage.evaluate((chatId, participantIds) => {
-            return window.Store.Wap.removeParticipants(chatId, participantIds);
-        }, this.id._serialized, participantIds);
+        // return await this.client.pupPage.evaluate((chatId, participantIds) => {
+        //     return window.Store.Wap.removeParticipants(chatId, participantIds);
+        // }, this.id._serialized, participantIds);
+        let data = [];
+        for (let participantId of participantIds) {
+            data.push(await this.client.pupPage.evaluate((chatId, participantIds) => {
+                return window.Store.Wap.removeParticipants(chatId, participantIds);
+            }, this.id._serialized, [participantId]));
+        }
+        return data;
     }
 
     /**
@@ -81,9 +95,16 @@ class GroupChat extends Chat {
      * @returns {Promise<{ status: number }>} Object with status code indicating if the operation was successful
      */
     async promoteParticipants(participantIds) {
-        return await this.client.pupPage.evaluate((chatId, participantIds) => {
-            return window.Store.Wap.promoteParticipants(chatId, participantIds);
-        }, this.id._serialized, participantIds);
+        // return await this.client.pupPage.evaluate((chatId, participantIds) => {
+        //     return window.Store.Wap.promoteParticipants(chatId, participantIds);
+        // }, this.id._serialized, participantIds);
+        let data = [];
+        for (let participantId of participantIds){
+            data.push(await this.client.pupPage.evaluate((chatId, participantIds) => {
+                return window.Store.Wap.promoteParticipants(chatId, participantIds);
+            }, this.id._serialized, [participantId]));
+        }
+        return data;
     }
 
     /**
@@ -92,9 +113,16 @@ class GroupChat extends Chat {
      * @returns {Promise<{ status: number }>} Object with status code indicating if the operation was successful
      */
     async demoteParticipants(participantIds) {
-        return await this.client.pupPage.evaluate((chatId, participantIds) => {
-            return window.Store.Wap.demoteParticipants(chatId, participantIds);
-        }, this.id._serialized, participantIds);
+        // return await this.client.pupPage.evaluate((chatId, participantIds) => {
+        //     return window.Store.Wap.demoteParticipants(chatId, participantIds);
+        // }, this.id._serialized, participantIds);
+        let data = [];
+        for (let participantId of participantIds){
+            data.push(await this.client.pupPage.evaluate((chatId, participantIds) => {
+                return window.Store.Wap.demoteParticipants(chatId, participantIds);
+            }, this.id._serialized, [participantId]));
+        }
+        return data;
     }
 
     /**
